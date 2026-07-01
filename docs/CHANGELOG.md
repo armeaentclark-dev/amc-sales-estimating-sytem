@@ -16,3 +16,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 - `/docs` structure: product requirements, architecture, database
   design, UI/UX guidelines, coding standards, roadmap, decisions log,
   and this changelog.
+- Phase 0.5: full business domain model, ERD, business rules, numbering
+  standards, and ERP integration boundaries
+  ([DOMAIN_MODEL.md](../docs/DOMAIN_MODEL.md)), including the
+  centralized Cost Library architecture decision.

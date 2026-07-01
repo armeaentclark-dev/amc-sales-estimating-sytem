@@ -16,8 +16,11 @@ PostgreSQL, hosted on Supabase. Schema is managed via Drizzle ORM
 
 ## Schema
 
-_TBD — no application tables exist yet. This section should document each
-table, its columns, relationships, and any RLS policies as they're added._
+No application tables exist yet. The business domain (entities,
+relationships, business rules, numbering) is fully specified in
+[DOMAIN_MODEL.md](./DOMAIN_MODEL.md) — this section will document the
+actual Drizzle table definitions as each entity is implemented, mapping
+1:1 back to that domain model.
 
 ## Migrations
 

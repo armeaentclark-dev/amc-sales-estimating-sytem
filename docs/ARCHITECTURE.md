@@ -49,6 +49,15 @@ docs/                    # Project documentation (this folder)
   storage, realtime); Drizzle queries running server-side should apply
   equivalent authorization checks in application code.
 
+## Business domain
+
+The full business entity model, ERD, business rules, numbering
+standards, and future ERP integration boundaries are documented in
+[DOMAIN_MODEL.md](./DOMAIN_MODEL.md). Notably, product costing is built
+around a centralized **Cost Library** (BOM/Labor/Equipment/Overhead
+Templates composed by a Product Template) rather than flat per-product
+pricing — see DOMAIN_MODEL.md §1.1 for why.
+
 ## Key decisions
 
 See [DECISIONS.md](./DECISIONS.md) for the rationale behind specific

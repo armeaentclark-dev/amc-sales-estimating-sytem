@@ -4,6 +4,23 @@ Short ADR-style log of notable decisions. Newest first.
 
 ---
 
+## 2026-07-01 — Centralized Cost Library instead of flat product pricing
+
+Product costing is modeled as a **Cost Library**: independent, reusable
+BOM Template / Labor Template / Equipment Template / Overhead Template
+entities, composed together by a Product Template, rather than pricing
+data living directly on each Product. Estimate Items reference a
+Product Template and store a resolved **cost snapshot** at creation/
+re-price time rather than a live pointer, so historical estimates stay
+accurate even as Cost Library records change. This was a direct
+requirement from the domain design review: it's the only structure that
+delivers one source of truth for costs, historical pricing accuracy,
+per-cost-type margin analysis, and a clean seam for future purchasing
+(Material) and inventory integration. See
+[DOMAIN_MODEL.md §1.1](./DOMAIN_MODEL.md#11-key-architectural-decision-centralized-cost-library).
+
+---
+
 ## 2026-07-01 — Radix component library + "Nova" preset for shadcn/ui
 
 shadcn/ui's CLI now asks which component library (Radix vs Base UI) and
