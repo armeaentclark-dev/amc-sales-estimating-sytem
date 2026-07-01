@@ -16,11 +16,43 @@ PostgreSQL, hosted on Supabase. Schema is managed via Drizzle ORM
 
 ## Schema
 
-No application tables exist yet. The business domain (entities,
-relationships, business rules, numbering) is fully specified in
-[DOMAIN_MODEL.md](./DOMAIN_MODEL.md) — this section will document the
-actual Drizzle table definitions as each entity is implemented, mapping
-1:1 back to that domain model.
+Business-domain tables (Customers, Projects, Cost Library, etc.) don't
+exist yet — see [DOMAIN_MODEL.md](./DOMAIN_MODEL.md) for the full
+specification, which this section will document 1:1 as each entity is
+implemented. Phase 1 introduced the platform/auth tables below.
+
+### Platform tables (Phase 1)
+
+**`roles`** — `id` (uuid, PK), `code` (text, unique — e.g. `admin`,
+`sales`, `estimator`), `name`, `description`, `created_at`. Seeded with
+3 default roles; no CRUD UI yet.
+
+**`permissions`** — `id` (uuid, PK), `code` (text, unique), `name`,
+`description`, `created_at`. Schema exists but is intentionally left
+empty until a future module defines what it needs to gate (see
+[DECISIONS.md](./DECISIONS.md)).
+
+**`role_permissions`** — join table, composite PK (`role_id`,
+`permission_id`), both FKs `onDelete: cascade`.
+
+**`users`** — `id` (uuid, PK — same value as `auth.users.id`, FK
+`onDelete: cascade`, added via hand-written SQL since Drizzle doesn't
+manage the `auth` schema), `email`, `full_name`, `role_id` (nullable FK
+to `roles`, `onDelete: set null`), `is_active` (default `true`),
+`created_at`, `updated_at`. A row is auto-created here by a Postgres
+trigger (`handle_new_auth_user()` on `auth.users` insert) whenever a
+user is created in Supabase Auth — see
+`src/lib/db/migrations/0001_auth_trigger.sql`.
+
+**`organization_settings`** — singleton (one row, enforced in
+application code, not a DB constraint): `id`, `name`, `logo_url`,
+`address_line1/2`, `city`, `state`, `postal_code`, `country`, `phone`,
+`email`, `website`, `tax_id`, `currency` (default `USD`), `timezone`
+(default `America/New_York`), `fiscal_year_start_month` (default `1`),
+`updated_at`. This is AMC's own org profile (tenant/owner data) — not
+to be confused with the domain model's `Company` entity, which
+represents a _customer's_ parent organization. See
+[DECISIONS.md](./DECISIONS.md).
 
 ## Migrations
 
@@ -31,5 +63,13 @@ committed to version control.
 
 ## Row Level Security (RLS)
 
-_TBD — document RLS policies per table once auth/authorization
-requirements are defined._
+RLS is **enabled with no policies defined** on all 5 Phase 1 tables
+(`roles`, `permissions`, `role_permissions`, `users`,
+`organization_settings`). The application only ever accesses these
+tables through the Drizzle client over a direct Postgres connection
+(a privileged role that bypasses RLS entirely), so RLS isn't doing
+access control here — it's a deny-by-default safeguard against
+accidental exposure if these tables were ever queried through
+Supabase's PostgREST/client-side API, which does respect RLS. Real
+policies get added per-table if/when a table is ever meant to be
+queried directly from the client.
