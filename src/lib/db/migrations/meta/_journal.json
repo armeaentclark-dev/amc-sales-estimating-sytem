@@ -113,6 +113,20 @@
       "when": 1782948350000,
       "tag": "0015_product_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1782949043553,
+      "tag": "0016_pricing_rules_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1782949100000,
+      "tag": "0017_pricing_rules_rls",
+      "breakpoints": true
     }
   ]
 }

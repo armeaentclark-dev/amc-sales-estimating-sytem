@@ -7,6 +7,7 @@ import {
   laborTemplates,
   overheadTemplates,
 } from "./cost-library-templates";
+import { markupRules } from "./pricing";
 import { productCategories } from "./reference-data";
 
 // The composition root of the Cost Library for a configurable product
@@ -32,9 +33,12 @@ export const productTemplates = pgTable("product_templates", {
   overheadTemplateId: uuid("overhead_template_id").references(
     () => overheadTemplates.id,
   ),
-  // No FK yet — Markup Rule doesn't exist until the Pricing Rules
-  // phase. Same deferred-column pattern as customers.companyId.
-  defaultMarkupRuleId: uuid("default_markup_rule_id"),
+  // FK added in the Pricing Rules phase migration (0016) once
+  // markup_rules exists — same deferred-column pattern as
+  // customers.companyId was for Company.
+  defaultMarkupRuleId: uuid("default_markup_rule_id").references(
+    () => markupRules.id,
+  ),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -86,6 +90,10 @@ export const productTemplatesRelations = relations(
     overheadTemplate: one(overheadTemplates, {
       fields: [productTemplates.overheadTemplateId],
       references: [overheadTemplates.id],
+    }),
+    defaultMarkupRule: one(markupRules, {
+      fields: [productTemplates.defaultMarkupRuleId],
+      references: [markupRules.id],
     }),
     products: many(products),
   }),

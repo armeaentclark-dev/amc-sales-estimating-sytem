@@ -183,6 +183,43 @@ deferred-column pattern as `customers.company_id`), `created_at`,
 FK — a Product doesn't have to be template-backed), `created_at`,
 `updated_at`.
 
+### Pricing rules tables (Phase 7)
+
+All five tables are internal-UUID-only (no business number, per
+[DOMAIN_MODEL.md §4](./DOMAIN_MODEL.md#4-numbering-standards)).
+`scope_id` columns are **deliberately plain `uuid` with no FK
+constraint** — they're polymorphic (the target table depends on
+`scope_type`), the same pattern the domain model itself uses for
+Attachment/Note's `attached_to`. See
+[DECISIONS.md](./DECISIONS.md).
+
+**`markup_rules`** — `scope_type` (enum: `product_category` /
+`product_template` / `customer`), `scope_id`, `markup_percent` /
+`target_margin_percent` (exactly one set, app-validated),
+`effective_date`.
+
+**`discount_rules`** — `scope_type` (enum: `customer` / `estimate` —
+`estimate` isn't usable in the UI yet, Estimate doesn't exist until
+the next phase), `scope_id`, `discount_percent` / `discount_amount`
+(exactly one set), `min_quantity` (nullable, the "volume threshold"
+condition).
+
+**`tax_rules`** — `jurisdiction`, `rate_percent`,
+`product_category_id` (nullable FK — null applies to all categories,
+this one **does** get a real FK since it's not polymorphic).
+
+**`customer_pricing_agreements`** (§6.3 recommendation) —
+`customer_id` (FK), `scope_type` (enum: `material` / `labor_process`),
+`scope_id`, `negotiated_rate`, `effective_date`, `expires_date`.
+
+**`approval_thresholds`** (§6.4 recommendation) — `name`,
+`margin_floor_percent` / `value_ceiling` (either/both nullable),
+`product_category_id` (nullable FK — null = applies globally).
+
+This phase also completes the deferred FK from Phase 6:
+`product_templates.default_markup_rule_id` now references
+`markup_rules.id`.
+
 ## Migrations
 
 Migrations are generated from schema changes in
@@ -192,7 +229,7 @@ committed to version control.
 
 ## Row Level Security (RLS)
 
-RLS is **enabled with no policies defined** on all 26 tables so far
+RLS is **enabled with no policies defined** on all 31 tables so far
 (`roles`, `permissions`, `role_permissions`, `users`,
 `organization_settings`, `customers`, `contacts`, `addresses`, `uoms`,
 `cost_categories`, `material_categories`, `product_categories`,
@@ -200,7 +237,9 @@ RLS is **enabled with no policies defined** on all 26 tables so far
 `bom_templates`, `bom_template_lines`, `labor_templates`,
 `labor_template_lines`, `equipment_templates`,
 `equipment_template_lines`, `overhead_templates`,
-`overhead_template_lines`, `product_templates`, `products`). The
+`overhead_template_lines`, `product_templates`, `products`,
+`markup_rules`, `discount_rules`, `tax_rules`,
+`customer_pricing_agreements`, `approval_thresholds`). The
 application only ever accesses these tables through the Drizzle client
 over a direct Postgres connection
 (a privileged role that bypasses RLS entirely), so RLS isn't doing

@@ -7,6 +7,7 @@ import {
   ListTree,
   Package,
   Settings,
+  Tags,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -33,6 +34,7 @@ const NAV_ITEMS = [
   { label: "Customers", href: "/customers", icon: Users },
   { label: "Cost Library", href: "/cost-library", icon: Layers },
   { label: "Products", href: "/products", icon: Package },
+  { label: "Pricing Rules", href: "/pricing", icon: Tags },
 ];
 
 function isNavItemActive(pathname: string, href: string) {

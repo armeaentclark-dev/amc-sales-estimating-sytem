@@ -7,6 +7,14 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- Phase 7: Pricing rules.
+  - `markup_rules` (scoped to Product Category/Template/Customer),
+    `discount_rules` (Customer scope only in the UI for now —
+    Estimate scope needs the next phase), `tax_rules`,
+    `customer_pricing_agreements` (§6.3), `approval_thresholds` (§6.4).
+  - `/pricing` page with a tab per rule type.
+  - Completes the deferred FK from Phase 6:
+    `product_templates.default_markup_rule_id` → `markup_rules.id`.
 - Phase 6: Products.
   - `product_templates` (`PRT-NNNNNN`, composing BOM/Labor/Equipment/
     Overhead Templates), `products` (`PRD-NNNNNN`, optionally backed

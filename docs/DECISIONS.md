@@ -4,6 +4,33 @@ Short ADR-style log of notable decisions. Newest first.
 
 ---
 
+## 2026-07-02 — Polymorphic `scope_id` columns have no FK constraint
+
+`markup_rules.scope_id`, `discount_rules.scope_id`, and
+`customer_pricing_agreements.scope_id` each point at a different
+table depending on the row's `scope_type` (e.g. a Markup Rule's scope
+is a Product Category, a Product Template, _or_ a Customer). Postgres
+has no native polymorphic FK, so these columns are plain `uuid` with
+no constraint — integrity is enforced at the application layer (Zod +
+the scope-type-driven `<Select>` in each form). This mirrors a pattern
+the domain model already uses for Attachment/Note's `attached_to`.
+Contrast with `tax_rules.product_category_id`, which always points at
+exactly one table and does get a real FK.
+
+---
+
+## 2026-07-02 — Discount Rule's "estimate" scope is schema-only for now
+
+`discount_rules.scope_type` includes `estimate` per
+[DOMAIN_MODEL.md §1.2](./DOMAIN_MODEL.md#12-entity-catalog), but the
+`Estimate` table doesn't exist until the next phase. The enum value
+exists (schema matches the domain model exactly) but the create form
+only offers "Customer" as a scope for now — an estimate-scoped
+discount genuinely can't be created before Estimates exist. Revisit
+the form once the Estimate Builder ships.
+
+---
+
 ## 2026-07-02 — Labor Process has no `default_labor_rate_id`
 
 `DOMAIN_MODEL.md` §1.2 lists `default_labor_rate_id` as a Labor
