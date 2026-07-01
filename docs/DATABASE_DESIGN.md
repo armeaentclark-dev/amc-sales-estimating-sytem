@@ -117,6 +117,35 @@ level 4), `created_at`.
 `region`, `commission_rate`) rather than a separate `salespeople`
 table — see [DECISIONS.md](./DECISIONS.md).
 
+### Cost Library core tables (Phase 4)
+
+**`materials`** — `id`, `material_number` (unique, `MAT-NNNNNN` via
+`generate_material_number()`, same sequence-function pattern as
+`customer_number`), `name`, `material_category_id` (FK), `uom_id`
+(FK), `current_unit_cost` (numeric), `cost_category_id` (FK),
+`created_at`, `updated_at`.
+
+**`labor_processes`** — `id`, `code` (unique, `LAB-NNNNNN`), `name`,
+`cost_category_id` (FK), `created_at`, `updated_at`. No
+`default_labor_rate_id` column — see [DECISIONS.md](./DECISIONS.md).
+
+**`labor_rates`** — `id`, `labor_process_id` (nullable FK — null means
+a Cost-Category-level fallback rate), `cost_category_id` (nullable
+FK), `rate_per_hour` (numeric), `effective_date`, `expires_date`
+(nullable), `created_at`. Internal UUID only, no business number, per
+[DOMAIN_MODEL.md §4](./DOMAIN_MODEL.md#4-numbering-standards).
+
+**`equipment`** — `id`, `equipment_number` (unique, `EQP-NNNNNN`),
+`name`, `cost_category_id` (FK), `rate_per_hour` (numeric),
+`created_at`, `updated_at`.
+
+Numbering migrations follow the sequences-before-tables order (unlike
+Phase 2's after-the-fact pattern): `0007_cost_library_sequences.sql`
+creates the sequences/functions first, `0008_cost_library_tables.sql`
+creates the tables with the default already declared, since the
+Drizzle schema declares `.default(sql\`generate_x_number()\`)` from
+the start this time instead of being added in a follow-up migration.
+
 ## Migrations
 
 Migrations are generated from schema changes in
@@ -126,10 +155,11 @@ committed to version control.
 
 ## Row Level Security (RLS)
 
-RLS is **enabled with no policies defined** on all 12 tables so far
+RLS is **enabled with no policies defined** on all 16 tables so far
 (`roles`, `permissions`, `role_permissions`, `users`,
 `organization_settings`, `customers`, `contacts`, `addresses`, `uoms`,
-`cost_categories`, `material_categories`, `product_categories`). The
+`cost_categories`, `material_categories`, `product_categories`,
+`materials`, `labor_processes`, `labor_rates`, `equipment`). The
 application only ever accesses these tables through the Drizzle client
 over a direct Postgres connection
 (a privileged role that bypasses RLS entirely), so RLS isn't doing

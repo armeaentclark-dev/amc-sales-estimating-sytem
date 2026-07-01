@@ -2,6 +2,7 @@
 
 import {
   Building2,
+  Layers,
   LayoutDashboard,
   ListTree,
   Settings,
@@ -29,6 +30,7 @@ import { UserMenu } from "@/components/layout/user-menu";
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Customers", href: "/customers", icon: Users },
+  { label: "Cost Library", href: "/cost-library", icon: Layers },
 ];
 
 function isNavItemActive(pathname: string, href: string) {

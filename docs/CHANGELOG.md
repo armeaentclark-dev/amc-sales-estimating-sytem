@@ -7,6 +7,12 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- Phase 4: Cost Library core.
+  - `materials` (`MAT-NNNNNN`), `labor_processes` (`LAB-NNNNNN`) +
+    effective-dated `labor_rates`, `equipment` (`EQP-NNNNNN`).
+  - Cost Library page (`/cost-library`) with Materials/Labor/Equipment
+    tabs; Labor processes have a "manage rates" action for adding/
+    removing effective-dated rate records.
 - Phase 3: Reference data.
   - `uoms`, `cost_categories`, `material_categories`,
     `product_categories` (self-referencing hierarchy) — shared lookups

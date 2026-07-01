@@ -4,6 +4,37 @@ Short ADR-style log of notable decisions. Newest first.
 
 ---
 
+## 2026-07-02 — Labor Process has no `default_labor_rate_id`
+
+`DOMAIN_MODEL.md` §1.2 lists `default_labor_rate_id` as a Labor
+Process attribute, but Labor Rate also has a `labor_process_id` FK
+back to Labor Process — a maintained "default" pointer would be a
+circular FK for no real benefit, since §3.8's costing hierarchy
+already resolves "the currently effective rate" by querying
+`effective_date`/`expires_date`, not by an explicit designation.
+Omitted the column; "current rate" is computed at read time (see
+`currentRate()` in `labor-panel.tsx`, and the same logic will be
+needed again in the Estimate Item pricing engine — worth extracting to
+a shared helper when that's built).
+
+---
+
+## 2026-07-02 — Cost Library sequences created before their tables
+
+Phase 2's `customer_number` pattern created the table first, then a
+follow-up migration added the sequence/function and retrofitted the
+column default (`0002` → `0003` → `0004`, three migrations because the
+need for a Drizzle-side `.default()` declaration was discovered after
+the fact). For Phase 4, declared `.default(sql\`generate_x_number()\`)`
+directly in the schema from the start, which meant the sequence/
+function migration had to be **generated and ordered before** the
+table-creation migration instead of after. Pattern going forward: any
+new sequence-backed number column should get its sequence/function
+migration authored first, table migration second — avoids the
+retrofit step Phase 2 needed.
+
+---
+
 ## 2026-07-02 — Salesperson fields on `users`, not a separate table
 
 `DOMAIN_MODEL.md` §1.2 already calls Salesperson "a system User" and
