@@ -1,0 +1,1 @@
+ALTER TABLE "customers" ALTER COLUMN "customer_number" SET DEFAULT generate_customer_number();

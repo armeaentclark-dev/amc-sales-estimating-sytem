@@ -7,6 +7,17 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- Phase 2: Customers.
+  - **Schema**: `customers` (`CUS-NNNNNN` numbering via a Postgres
+    sequence), `contacts`, `addresses` — the Company (parent org
+    rollup) entity from the domain model is deferred; `customers`
+    carries a nullable, unreferenced `company_id` column for it.
+  - **CRUD**: list page with search (`/customers`), create
+    (`/customers/new`), and a detail page (`/customers/[id]`) with
+    inline add/edit/delete for Contacts and Addresses.
+  - No new RBAC permission codes yet — Customers CRUD just requires
+    login, consistent with Phase 1's "permissions populated
+    incrementally per module" approach.
 - Phase 1: platform foundation.
   - **Auth**: Supabase Auth login (no registration — internal user
     provisioning only), session-refresh middleware, layered route

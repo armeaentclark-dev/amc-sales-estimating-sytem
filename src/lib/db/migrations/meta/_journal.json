@@ -15,6 +15,27 @@
       "when": 1782876027413,
       "tag": "0001_auth_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782911259643,
+      "tag": "0002_customers_contacts_addresses",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1782911300000,
+      "tag": "0003_customer_number_sequence",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1782943106848,
+      "tag": "0004_customer_number_default_in_schema",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, LayoutDashboard, Settings } from "lucide-react";
+import { Building2, LayoutDashboard, Settings, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -19,8 +19,15 @@ import {
 } from "@/components/ui/sidebar";
 import { UserMenu } from "@/components/layout/user-menu";
 
-// Add entries here as future modules ship (Customers, Estimates, etc).
-const NAV_ITEMS = [{ label: "Dashboard", href: "/", icon: LayoutDashboard }];
+// Add entries here as future modules ship (Estimates, etc).
+const NAV_ITEMS = [
+  { label: "Dashboard", href: "/", icon: LayoutDashboard },
+  { label: "Customers", href: "/customers", icon: Users },
+];
+
+function isNavItemActive(pathname: string, href: string) {
+  return href === "/" ? pathname === "/" : pathname.startsWith(href);
+}
 
 const SETTINGS_ITEMS = [
   { label: "Company", href: "/settings/company", icon: Building2 },
@@ -67,7 +74,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname === item.href}
+                    isActive={isNavItemActive(pathname, item.href)}
                     tooltip={item.label}
                   >
                     <Link href={item.href}>

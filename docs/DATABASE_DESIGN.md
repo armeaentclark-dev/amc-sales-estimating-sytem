@@ -16,10 +16,9 @@ PostgreSQL, hosted on Supabase. Schema is managed via Drizzle ORM
 
 ## Schema
 
-Business-domain tables (Customers, Projects, Cost Library, etc.) don't
-exist yet — see [DOMAIN_MODEL.md](./DOMAIN_MODEL.md) for the full
-specification, which this section will document 1:1 as each entity is
-implemented. Phase 1 introduced the platform/auth tables below.
+Business-domain tables are introduced incrementally per
+[DOMAIN_MODEL.md](./DOMAIN_MODEL.md) as each module ships. Phase 1
+introduced the platform/auth tables; Phase 2 introduced Customers.
 
 ### Platform tables (Phase 1)
 
@@ -54,6 +53,46 @@ to be confused with the domain model's `Company` entity, which
 represents a _customer's_ parent organization. See
 [DECISIONS.md](./DECISIONS.md).
 
+### Business tables (Phase 2)
+
+**`customers`** — `id` (uuid, PK), `customer_number` (text, unique,
+format `CUS-NNNNNN` — see [DOMAIN_MODEL.md §4](./DOMAIN_MODEL.md#4-numbering-standards)),
+`name`, `status` (enum: `prospect` | `active` | `inactive`, default
+`prospect`), `payment_terms` (nullable), `company_id` (nullable uuid,
+**no FK yet** — the domain model's `Company` parent-org-rollup entity
+is deferred past Phase 2 v1; the column exists so a later migration
+doesn't need to add it), `created_at`, `updated_at`.
+
+`customer_number` defaults to `generate_customer_number()`, a Postgres
+function backed by the `customers_customer_number_seq` sequence (`'CUS-' ||
+LPAD(nextval(...)::text, 6, '0')`) — see
+`src/lib/db/migrations/0003_customer_number_sequence.sql`. The default
+is declared in both the hand-written migration (DB-level truth) and
+the Drizzle schema (`.default(sql\`generate_customer_number()\`)`) —
+without the latter, Drizzle's generated insert types require
+`customerNumber` on every insert since it has no way to know about a
+default set purely via raw SQL.
+
+**`contacts`** — `id` (uuid, PK), `customer_id` (uuid, FK →
+`customers.id`, `onDelete: cascade`), `name`, `title`, `email`,
+`phone`, `is_primary` (boolean, default `false`), `created_at`,
+`updated_at`.
+
+**`addresses`** — `id` (uuid, PK), `customer_id` (uuid, FK →
+`customers.id`, `onDelete: cascade`), `type` (enum: `billing` |
+`shipping`), `line1`, `line2` (nullable), `city`, `state`,
+`postal_code`, `country` (default `US`), `created_at`, `updated_at`.
+
+All three tables live in a single schema file
+(`src/lib/db/schema/customers.ts`) rather than one file per table.
+Splitting them caused a circular-import bug: `relations()` resolves
+its target table argument synchronously, so `customers.ts` importing
+`contacts.ts`/`addresses.ts` (for the `many()` side) while those files
+import `customers.ts` back (for the `one()` side) threw `Cannot access
+'customers' before initialization` at runtime. Consolidating avoids
+the cycle, mirroring how the RBAC domain (`roles`/`permissions`/
+`role_permissions`/`users`) already lives in one `users.ts` file.
+
 ## Migrations
 
 Migrations are generated from schema changes in
@@ -63,10 +102,11 @@ committed to version control.
 
 ## Row Level Security (RLS)
 
-RLS is **enabled with no policies defined** on all 5 Phase 1 tables
+RLS is **enabled with no policies defined** on all 8 tables so far
 (`roles`, `permissions`, `role_permissions`, `users`,
-`organization_settings`). The application only ever accesses these
-tables through the Drizzle client over a direct Postgres connection
+`organization_settings`, `customers`, `contacts`, `addresses`). The
+application only ever accesses these tables through the Drizzle client
+over a direct Postgres connection
 (a privileged role that bypasses RLS entirely), so RLS isn't doing
 access control here — it's a deny-by-default safeguard against
 accidental exposure if these tables were ever queried through
