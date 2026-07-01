@@ -146,6 +146,27 @@ creates the tables with the default already declared, since the
 Drizzle schema declares `.default(sql\`generate_x_number()\`)` from
 the start this time instead of being added in a follow-up migration.
 
+### Cost Library template tables (Phase 5)
+
+Four structurally-identical Template + Template Line pairs, all in
+`src/lib/db/schema/cost-library-templates.ts` (Line tables `many()`-
+relate back to their Template, same one-file rule as
+`customers.ts`/`cost-library.ts`):
+
+- **`bom_templates`** (`BOM-NNNNNN`) / **`bom_template_lines`** —
+  `material_id`, `quantity`, `uom_id`, `scrap_percent`.
+- **`labor_templates`** (`LBT-NNNNNN`) / **`labor_template_lines`** —
+  `labor_process_id`, `standard_hours`.
+- **`equipment_templates`** (`EQT-NNNNNN`) /
+  **`equipment_template_lines`** — `equipment_id`, `standard_hours`.
+- **`overhead_templates`** (`OHT-NNNNNN`) /
+  **`overhead_template_lines`** — `cost_category_id`,
+  `allocation_method` (enum: `percent_of_labor` /
+  `percent_of_direct_cost` / `flat_per_unit`), `rate`.
+
+All four Templates share `name`, `is_active`, `created_at`,
+`updated_at`; `bom_templates` additionally has `revision` (integer).
+
 ## Migrations
 
 Migrations are generated from schema changes in
@@ -155,13 +176,16 @@ committed to version control.
 
 ## Row Level Security (RLS)
 
-RLS is **enabled with no policies defined** on all 16 tables so far
+RLS is **enabled with no policies defined** on all 24 tables so far
 (`roles`, `permissions`, `role_permissions`, `users`,
 `organization_settings`, `customers`, `contacts`, `addresses`, `uoms`,
 `cost_categories`, `material_categories`, `product_categories`,
-`materials`, `labor_processes`, `labor_rates`, `equipment`). The
-application only ever accesses these tables through the Drizzle client
-over a direct Postgres connection
+`materials`, `labor_processes`, `labor_rates`, `equipment`,
+`bom_templates`, `bom_template_lines`, `labor_templates`,
+`labor_template_lines`, `equipment_templates`,
+`equipment_template_lines`, `overhead_templates`,
+`overhead_template_lines`). The application only ever accesses these
+tables through the Drizzle client over a direct Postgres connection
 (a privileged role that bypasses RLS entirely), so RLS isn't doing
 access control here — it's a deny-by-default safeguard against
 accidental exposure if these tables were ever queried through

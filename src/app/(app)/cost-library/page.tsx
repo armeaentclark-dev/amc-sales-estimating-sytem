@@ -1,7 +1,11 @@
+import { Layers } from "lucide-react";
+import Link from "next/link";
+
 import { EquipmentPanel } from "@/components/cost-library/equipment-panel";
 import { LaborPanel } from "@/components/cost-library/labor-panel";
 import { MaterialPanel } from "@/components/cost-library/material-panel";
 import { PageHeader } from "@/components/page-header";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   getEquipment,
@@ -40,6 +44,14 @@ export default async function CostLibraryPage() {
           { label: "Dashboard", href: "/" },
           { label: "Cost Library" },
         ]}
+        actions={
+          <Button asChild variant="outline">
+            <Link href="/cost-library/templates">
+              <Layers />
+              Templates
+            </Link>
+          </Button>
+        }
       />
       <Tabs defaultValue="materials">
         <TabsList>

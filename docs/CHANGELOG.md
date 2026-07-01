@@ -7,6 +7,15 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- Phase 5: Cost Library templates.
+  - `bom_templates`/`bom_template_lines` (`BOM-NNNNNN`),
+    `labor_templates`/`labor_template_lines` (`LBT-NNNNNN`),
+    `equipment_templates`/`equipment_template_lines` (`EQT-NNNNNN`),
+    `overhead_templates`/`overhead_template_lines` (`OHT-NNNNNN`) —
+    the reusable "recipes" a Product Template will compose in the
+    next phase.
+  - `/cost-library/templates` page with a tab per template type, each
+    with a "manage lines" action for its line items.
 - Phase 4: Cost Library core.
   - `materials` (`MAT-NNNNNN`), `labor_processes` (`LAB-NNNNNN`) +
     effective-dated `labor_rates`, `equipment` (`EQP-NNNNNN`).
