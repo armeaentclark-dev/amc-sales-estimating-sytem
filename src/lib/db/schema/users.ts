@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   boolean,
+  numeric,
   pgTable,
   primaryKey,
   text,
@@ -52,6 +53,12 @@ export const users = pgTable("users", {
     onDelete: "set null",
   }),
   isActive: boolean("is_active").notNull().default(true),
+  // Salesperson fields (DOMAIN_MODEL.md §1.2/§6.2): Salesperson is a
+  // business role a User plays, not a separate entity — these are
+  // nullable since not every user is a salesperson.
+  employeeCode: text("employee_code"),
+  region: text("region"),
+  commissionRate: numeric("commission_rate", { precision: 5, scale: 4 }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

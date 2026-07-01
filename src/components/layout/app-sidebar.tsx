@@ -1,6 +1,12 @@
 "use client";
 
-import { Building2, LayoutDashboard, Settings, Users } from "lucide-react";
+import {
+  Building2,
+  LayoutDashboard,
+  ListTree,
+  Settings,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -31,6 +37,7 @@ function isNavItemActive(pathname: string, href: string) {
 
 const SETTINGS_ITEMS = [
   { label: "Company", href: "/settings/company", icon: Building2 },
+  { label: "Reference Data", href: "/settings/reference-data", icon: ListTree },
 ];
 
 interface AppSidebarProps {

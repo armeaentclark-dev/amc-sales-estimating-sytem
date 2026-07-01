@@ -4,6 +4,30 @@ Short ADR-style log of notable decisions. Newest first.
 
 ---
 
+## 2026-07-02 — Salesperson fields on `users`, not a separate table
+
+`DOMAIN_MODEL.md` §1.2 already calls Salesperson "a system User" and
+§6.2 recommends a real `User`/`Role` entity, which Phase 1's RBAC
+schema already provides. Added `employee_code`, `region`, and
+`commission_rate` as nullable columns directly on `users` rather than
+a `salespeople` table — there's no independent Salesperson identity or
+lifecycle to model beyond "a User who happens to have these fields
+set." Revisit only if Salespeople need attributes that don't make
+sense on every user (unlikely, given the domain model's own framing).
+
+---
+
+## 2026-07-02 — UOM conversion factors deferred
+
+`DOMAIN_MODEL.md` §6.1 recommends a UOM entity "with conversion
+factors." Built the lookup table (`code`, `name`) but not conversion
+arithmetic — nothing in the schema yet does cross-unit quantity math
+(that starts with BOM Template Lines in a later phase). Adding
+conversion factors now would be speculative; revisit when Material/BOM
+costing actually needs to convert between units.
+
+---
+
 ## 2026-07-02 — Customer/Contact/Address schema kept in one file
 
 Split into three files initially (`customers.ts`, `contacts.ts`,

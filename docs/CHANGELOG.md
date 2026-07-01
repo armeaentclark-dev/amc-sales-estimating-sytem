@@ -7,6 +7,15 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- Phase 3: Reference data.
+  - `uoms`, `cost_categories`, `material_categories`,
+    `product_categories` (self-referencing hierarchy) — shared lookups
+    for the upcoming Cost Library and Product catalog.
+  - Salesperson fields (`employee_code`, `region`, `commission_rate`)
+    added directly to `users`, per `DOMAIN_MODEL.md`'s "Salesperson is
+    a business role a User plays" — no separate table.
+  - Settings → Reference Data page with a tab per lookup type,
+    add/edit/delete for each.
 - Phase 2: Customers.
   - **Schema**: `customers` (`CUS-NNNNNN` numbering via a Postgres
     sequence), `contacts`, `addresses` — the Company (parent org

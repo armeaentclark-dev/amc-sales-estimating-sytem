@@ -93,6 +93,30 @@ import `customers.ts` back (for the `one()` side) threw `Cannot access
 the cycle, mirroring how the RBAC domain (`roles`/`permissions`/
 `role_permissions`/`users`) already lives in one `users.ts` file.
 
+### Reference data tables (Phase 3)
+
+**`uoms`** — `id`, `code` (unique, e.g. `EA`/`FT`/`LB`/`HR`), `name`,
+`created_at`. Conversion factors between units are not modeled yet —
+see [DECISIONS.md](./DECISIONS.md).
+
+**`cost_categories`** — `id`, `code` (unique), `name`, `cost_type`
+(enum: `material`/`labor`/`equipment`/`overhead`), `created_at`.
+Referenced by Material, Labor Process, Equipment, and Overhead
+Template Line as they're built out.
+
+**`material_categories`** — `id`, `code` (unique), `name`,
+`default_unit_cost` (nullable, the coarse pricing-hierarchy fallback
+from [DOMAIN_MODEL.md §3.7](./DOMAIN_MODEL.md#37-material-pricing-hierarchy)
+level 4), `created_at`.
+
+**`product_categories`** — `id`, `code` (unique), `name`,
+`parent_category_id` (nullable self-FK, for category hierarchy),
+`created_at`.
+
+**`users`** gained three nullable Salesperson columns (`employee_code`,
+`region`, `commission_rate`) rather than a separate `salespeople`
+table — see [DECISIONS.md](./DECISIONS.md).
+
 ## Migrations
 
 Migrations are generated from schema changes in
@@ -102,9 +126,10 @@ committed to version control.
 
 ## Row Level Security (RLS)
 
-RLS is **enabled with no policies defined** on all 8 tables so far
+RLS is **enabled with no policies defined** on all 12 tables so far
 (`roles`, `permissions`, `role_permissions`, `users`,
-`organization_settings`, `customers`, `contacts`, `addresses`). The
+`organization_settings`, `customers`, `contacts`, `addresses`, `uoms`,
+`cost_categories`, `material_categories`, `product_categories`). The
 application only ever accesses these tables through the Drizzle client
 over a direct Postgres connection
 (a privileged role that bypasses RLS entirely), so RLS isn't doing
