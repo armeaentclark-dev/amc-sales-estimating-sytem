@@ -167,6 +167,22 @@ relate back to their Template, same one-file rule as
 All four Templates share `name`, `is_active`, `created_at`,
 `updated_at`; `bom_templates` additionally has `revision` (integer).
 
+### Product tables (Phase 6)
+
+**`product_templates`** — `id`, `template_number` (unique,
+`PRT-NNNNNN`), `name`, `product_category_id` (FK), `bom_template_id`
+/ `labor_template_id` / `equipment_template_id` / `overhead_template_id`
+(all nullable FKs — a template doesn't have to define every cost
+dimension up front), `default_markup_rule_id` (nullable uuid, **no FK
+yet** — Markup Rule doesn't exist until the Pricing Rules phase, same
+deferred-column pattern as `customers.company_id`), `created_at`,
+`updated_at`.
+
+**`products`** — `id`, `product_number` (unique, `PRD-NNNNNN`),
+`name`, `product_category_id` (FK), `product_template_id` (nullable
+FK — a Product doesn't have to be template-backed), `created_at`,
+`updated_at`.
+
 ## Migrations
 
 Migrations are generated from schema changes in
@@ -176,7 +192,7 @@ committed to version control.
 
 ## Row Level Security (RLS)
 
-RLS is **enabled with no policies defined** on all 24 tables so far
+RLS is **enabled with no policies defined** on all 26 tables so far
 (`roles`, `permissions`, `role_permissions`, `users`,
 `organization_settings`, `customers`, `contacts`, `addresses`, `uoms`,
 `cost_categories`, `material_categories`, `product_categories`,
@@ -184,8 +200,9 @@ RLS is **enabled with no policies defined** on all 24 tables so far
 `bom_templates`, `bom_template_lines`, `labor_templates`,
 `labor_template_lines`, `equipment_templates`,
 `equipment_template_lines`, `overhead_templates`,
-`overhead_template_lines`). The application only ever accesses these
-tables through the Drizzle client over a direct Postgres connection
+`overhead_template_lines`, `product_templates`, `products`). The
+application only ever accesses these tables through the Drizzle client
+over a direct Postgres connection
 (a privileged role that bypasses RLS entirely), so RLS isn't doing
 access control here — it's a deny-by-default safeguard against
 accidental exposure if these tables were ever queried through

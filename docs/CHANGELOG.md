@@ -7,6 +7,13 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- Phase 6: Products.
+  - `product_templates` (`PRT-NNNNNN`, composing BOM/Labor/Equipment/
+    Overhead Templates), `products` (`PRD-NNNNNN`, optionally backed
+    by a Product Template).
+  - `/products` page with Product Templates and Products tabs.
+  - `product_templates.default_markup_rule_id` added as a nullable,
+    FK-less column — Markup Rule ships in the next phase.
 - Phase 5: Cost Library templates.
   - `bom_templates`/`bom_template_lines` (`BOM-NNNNNN`),
     `labor_templates`/`labor_template_lines` (`LBT-NNNNNN`),

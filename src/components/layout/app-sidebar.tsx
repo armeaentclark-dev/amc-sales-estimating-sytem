@@ -5,6 +5,7 @@ import {
   Layers,
   LayoutDashboard,
   ListTree,
+  Package,
   Settings,
   Users,
 } from "lucide-react";
@@ -31,6 +32,7 @@ const NAV_ITEMS = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Customers", href: "/customers", icon: Users },
   { label: "Cost Library", href: "/cost-library", icon: Layers },
+  { label: "Products", href: "/products", icon: Package },
 ];
 
 function isNavItemActive(pathname: string, href: string) {

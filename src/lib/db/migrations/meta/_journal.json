@@ -92,6 +92,27 @@
       "when": 1782946950000,
       "tag": "0012_cost_library_template_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1782947000000,
+      "tag": "0013_product_sequences",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1782948301844,
+      "tag": "0014_product_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1782948350000,
+      "tag": "0015_product_rls",
+      "breakpoints": true
     }
   ]
 }
