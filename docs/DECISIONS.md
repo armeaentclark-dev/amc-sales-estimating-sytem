@@ -4,6 +4,37 @@ Short ADR-style log of notable decisions. Newest first.
 
 ---
 
+## 2026-07-02 — Superseded (Vercel only): Transaction Pooler instead of Session Pooler
+
+**Supersedes "Session Pooler instead of direct connection" below, for
+the deployed environment only** — exactly the scenario that decision's
+own "revisit" note called out ("if the app moves to an edge or
+high-concurrency serverless deployment target" / "if connection limits
+under the pooler become a problem at scale").
+
+First Vercel deployment failed at runtime (not build time) with
+`XX000: max clients reached in session mode - max clients are limited
+to pool_size: 15`. Session Pooler holds one dedicated Postgres
+connection open for the entire life of each client connection — fine
+for a single long-running local dev process, but each concurrent
+Vercel serverless function invocation opens its own connection, and a
+handful of concurrent requests exhausts a 15-connection pool.
+
+Fixed by switching Vercel's `DATABASE_URL` environment variable to
+Supabase's **Transaction Pooler** (same host, port `6543` instead of
+`5432`), which releases each connection back to the pool after every
+query/transaction instead of holding it for the session. No code
+change needed — `src/lib/db/client.ts` already passes
+`{ prepare: false }` to the postgres.js client, which happens to be
+the one requirement transaction-pooler mode has (no prepared
+statements). **Local development stays on the Session Pooler** — a
+single persistent dev server process doesn't hit this failure mode,
+so there's no reason to change what already works there. This means
+`DATABASE_URL` now legitimately differs by environment: Session Pooler
+in `.env.local`, Transaction Pooler in Vercel's project settings.
+
+---
+
 ## 2026-07-02 — Vitest, reusing the dev DB for pricing engine tests
 
 Chose **Vitest** for the first real test suite (matches the `rtk`
