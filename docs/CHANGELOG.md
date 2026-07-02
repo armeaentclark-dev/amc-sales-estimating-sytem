@@ -7,6 +7,26 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- Phase 8: Estimate Builder — the last piece of the original scope.
+  - `estimate_statuses` (seeded state machine, 10 states per
+    `DOMAIN_MODEL.md` §3.1/§3.4), `estimates` (`EST-YYYY-NNNNNN`,
+    year-resetting), `estimate_revisions`, `estimate_items` (full cost
+    snapshot), `approvals` (immutable), `attachments`, `notes`.
+  - Pricing/margin calculation engine
+    (`src/lib/estimating/pricing-engine.ts`) implementing the
+    material/labor pricing hierarchies (§3.7/§3.8) and margin math
+    (§3.6) as pure, independently-verified functions — see
+    `DECISIONS.md` for two formula ambiguities that needed
+    interpretation (flagged for review) and the verification approach.
+  - `/estimates` list, create form, and a detail page: line items with
+    live-computed pricing, status action buttons driving the full
+    lifecycle (Draft → InReview → Approved → Sent → Won → Converted,
+    plus Rejected/Lost/Expired/Voided and "request changes" at two
+    different points per §3.2), approval recording, notes, and
+    attachments (URL-entry MVP).
+  - Verified end-to-end in a browser: full lifecycle walked from
+    creation through Converted in one continuous run, zero console
+    errors, computed prices matching hand-calculated values exactly.
 - Phase 7: Pricing rules.
   - `markup_rules` (scoped to Product Category/Template/Customer),
     `discount_rules` (Customer scope only in the UI for now —

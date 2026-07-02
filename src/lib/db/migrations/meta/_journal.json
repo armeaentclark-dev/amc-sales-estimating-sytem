@@ -127,6 +127,27 @@
       "when": 1782949100000,
       "tag": "0017_pricing_rules_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1782950000000,
+      "tag": "0018_estimate_number_counter",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1782950423135,
+      "tag": "0019_estimate_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1782950500000,
+      "tag": "0020_estimate_rls",
+      "breakpoints": true
     }
   ]
 }

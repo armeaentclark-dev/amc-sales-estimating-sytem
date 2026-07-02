@@ -1,0 +1,9 @@
+-- Hand-written migration. Same rationale as prior RLS migrations.
+ALTER TABLE "estimate_statuses" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "estimate_number_counters" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "estimates" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "estimate_revisions" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "estimate_items" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "approvals" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "attachments" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "notes" ENABLE ROW LEVEL SECURITY;

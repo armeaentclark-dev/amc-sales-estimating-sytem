@@ -4,6 +4,124 @@ Short ADR-style log of notable decisions. Newest first.
 
 ---
 
+## 2026-07-02 — ⚠️ Two ambiguous domain-model formulas, interpreted and flagged for review
+
+Two spots in `DOMAIN_MODEL.md` §3.6 don't have one unambiguous
+reading. Both were resolved in favor of internal consistency and
+verified against hand-calculated test data (all pass), but since this
+computes real quote numbers, both are called out explicitly here for
+the domain model's author to confirm or correct:
+
+1. **`flat_per_unit` overhead**: the formula literally reads
+   `rate × quantity`, but `Extended Price = Net Price × Quantity`
+   means quantity must only be applied _once_, and every other cost
+   component (Material/Labor/Equipment Cost) is computed **per unit**
+   with no quantity multiplication. Applying `rate × quantity` again
+   inside Overhead Cost would double-count. Interpreted `flat_per_unit`
+   as "the rate already **is** the per-unit overhead cost" — i.e.
+   Overhead Cost contribution = `rate`, not `rate × quantity`. Verified:
+   `computeEstimateItemPricing` at quantity=1 and quantity=3 returns
+   the _same_ `totalDirectCost` (correctly per-unit) with
+   `extendedPrice` scaling linearly.
+2. **Markup Rule "most-specific wins" ordering**: §1.2 says Markup
+   Rule is "attachable at Product Category, Product Template, or
+   Customer level (most-specific wins)" but doesn't rank those three
+   against each other. Interpreted Customer as most specific (a
+   negotiated deal beats a product default), then Product Template,
+   then Product Category as the coarsest fallback — the most natural
+   reading, and symmetric with how §3.7/§3.8's material/labor
+   hierarchies already put "customer-specific negotiated price" above
+   catalog-level pricing.
+
+Both live in `src/lib/estimating/pricing-engine.ts`
+(`computeProductTemplateCost`'s overhead loop, `resolveMarkup`'s scope
+ordering) with inline comments pointing back here.
+
+---
+
+## 2026-07-02 — `EST-YYYY-NNNNNN` uses a per-year counter table, not a sequence
+
+Every other numbered entity (`CUS-`, `MAT-`, `PRT-`, etc.) uses a flat
+global Postgres `SEQUENCE`, but Estimate numbers reset every calendar
+year (`DOMAIN_MODEL.md` §4) and a plain `SEQUENCE` has no built-in
+reset. `estimate_number_counters(year, last_number)` +
+`generate_estimate_number()` upserts the current year's row
+atomically (`ON CONFLICT ("year") DO UPDATE ... RETURNING`), which
+serializes concurrent callers via Postgres's row-level lock the same
+way `nextval()` does — satisfying §4's "never derived from `count(*)`"
+requirement. Verified: two back-to-back calls return sequential
+numbers, and a separately-tracked prior-year row stays independent.
+
+---
+
+## 2026-07-02 — Estimate Status is a real table, not an enum
+
+Every other fixed-value classification in this codebase (`customer_status`,
+`cost_type`, `markup_scope_type`, etc.) is a Postgres enum, but Estimate
+Status needed `is_terminal` and `allowed_next_states` metadata
+alongside each code (§3.1/§3.4) — an enum can't carry that. Every
+status-transition server action (`transitionRevision` in
+`src/lib/actions/estimates.ts`) checks `allowed_next_states` before
+applying a change, so the seeded table (not scattered `if` statements)
+is the single source of truth for the state machine.
+
+---
+
+## 2026-07-02 — Cost snapshot detail stored as JSONB, not one column per cost line
+
+`estimate_items` has real numeric columns for the aggregate totals
+(needed for sums/sorting/display) but stores the itemized resolution
+trail — which BOM/labor/equipment/overhead line resolved to what cost,
+via which pricing-hierarchy level — as a single `cost_snapshot_detail`
+jsonb column. A Product Template's line count is unbounded and
+variable per template, so a fixed set of columns doesn't fit; jsonb
+keeps the full audit trail queryable without a variable-width schema.
+
+---
+
+## 2026-07-02 — Single approval satisfies the InReview → Approved transition (MVP)
+
+`DOMAIN_MODEL.md` §3.3 describes multi-level approval ("e.g. sales
+manager, then finance, above a higher threshold") as an example, not
+a concrete rule for how many approvers or which roles are required at
+which thresholds — `approval_thresholds` (built in Phase 7) only
+carries margin-floor/value-ceiling numbers, not an approval-count or
+role requirement. Building a configurable N-approvals-required engine
+would be speculative given that gap. Current behavior: submitting for
+review computes and displays which thresholds (if any) are breached as
+context for the approver, but a single `recordApprovalAction` decision
+moves the revision to Approved or Rejected. Revisit if/when the
+threshold entity grows a "required approval count/role" field.
+
+---
+
+## 2026-07-02 — Manual cost override replaces the whole item cost, not per BOM-line
+
+§3.7/§3.8 list "manual override entered directly on the Estimate Item"
+as level 1 of the material _and_ labor pricing hierarchies separately,
+which could be read as allowing an override on individual BOM/labor
+lines within a Product Template's cost breakdown. Implemented it at
+the Estimate Item level instead — `manual_cost_override` replaces the
+entire computed `total_direct_cost` — since per-line overrides would
+need UI to edit individual resolved BOM/labor/equipment lines inside
+an Estimate Item, a materially larger feature than the rest of Phase 8.
+Revisit if a real workflow needs to override just one input (e.g. one
+negotiated material price) while still computing the rest normally.
+
+---
+
+## 2026-07-02 — Attachments are a filename + URL, not a real upload widget
+
+`attachments.file_url` expects a URL; the MVP form just takes a
+pasted filename + URL rather than a drag-and-drop upload. A real
+upload would need a dedicated Supabase Storage bucket provisioned out
+of band (the same manual setup step `organization-assets` needed for
+the Company logo in Phase 1) — out of scope to provision blind in this
+pass. Swap in the same upload pattern `company-settings-form.tsx`
+already uses once a bucket exists.
+
+---
+
 ## 2026-07-02 — Polymorphic `scope_id` columns have no FK constraint
 
 `markup_rules.scope_id`, `discount_rules.scope_id`, and

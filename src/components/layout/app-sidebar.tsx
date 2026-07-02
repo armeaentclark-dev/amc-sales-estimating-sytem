@@ -2,6 +2,7 @@
 
 import {
   Building2,
+  FileText,
   Layers,
   LayoutDashboard,
   ListTree,
@@ -35,6 +36,7 @@ const NAV_ITEMS = [
   { label: "Cost Library", href: "/cost-library", icon: Layers },
   { label: "Products", href: "/products", icon: Package },
   { label: "Pricing Rules", href: "/pricing", icon: Tags },
+  { label: "Estimates", href: "/estimates", icon: FileText },
 ];
 
 function isNavItemActive(pathname: string, href: string) {

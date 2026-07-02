@@ -220,6 +220,60 @@ This phase also completes the deferred FK from Phase 6:
 `product_templates.default_markup_rule_id` now references
 `markup_rules.id`.
 
+### Estimate Builder tables (Phase 8)
+
+**`estimate_statuses`** — lookup + state machine table (not an enum):
+`code`, `label`, `is_terminal`, `allowed_next_states` (text array of
+codes). Seeded via `pnpm db:seed` with the 10 states and transitions
+from [DOMAIN_MODEL.md §3.1/§3.4](./DOMAIN_MODEL.md#31-estimate-lifecycle).
+Every status-changing server action checks
+`allowed_next_states` before applying a transition — this table is
+the single source of truth for what's legal, not scattered
+conditionals in application code.
+
+**`estimate_number_counters`** + `generate_estimate_number()` —
+`EST-YYYY-NNNNNN` resets every calendar year, unlike every other
+number in this system (all flat/global). A plain Postgres `SEQUENCE`
+has no yearly reset, so this is a per-year counter row instead,
+upserted atomically via `ON CONFLICT ("year") DO UPDATE ... RETURNING`
+— concurrency-safe the same way `nextval()` is. See
+[DECISIONS.md](./DECISIONS.md).
+
+**`estimates`** — `estimate_number`, `customer_id` (FK),
+`salesperson_id` (FK to `users` — Salesperson is a User role, not a
+separate table, per Phase 3), `title`, `currency`, `valid_until`.
+
+**`estimate_revisions`** — `estimate_id` (FK cascade),
+`revision_number`, `status_id` (FK), `is_current` (app-enforced
+exactly-one-per-estimate invariant), `created_by` (FK), `superseded_at`.
+
+**`estimate_items`** — the cost snapshot
+([§1.3](./DOMAIN_MODEL.md#13-cost-snapshot-implicit-entity)/[§3.5](./DOMAIN_MODEL.md#35-cost-snapshot-vs-live-cost-library)):
+real numeric columns for the aggregate totals
+(`material_cost`/`labor_cost`/`equipment_cost`/`overhead_cost`/
+`total_direct_cost`/`list_price`/`net_price`/`extended_price`, all
+**per unit** — quantity is applied once, at `extended_price`), plus a
+`cost_snapshot_detail` **jsonb** column holding the itemized
+resolution trail (which BOM/labor/equipment/overhead lines, which
+pricing-hierarchy level resolved each cost) instead of dozens more
+columns. `manual_cost_override` replaces the _whole_ computed cost
+when set (§3.7/§3.8 level 1) — not per-BOM-line overrides. See
+DECISIONS.md for both simplifications.
+
+**`approvals`** — immutable once recorded (§3.3), no update action.
+Internal UUID only.
+
+**`attachments`** / **`notes`** — `attached_to_type`/`attached_to_id`
+are polymorphic (plain uuid, no FK), same pattern as `pricing.ts`'s
+`scope_id` columns.
+
+The pricing/margin calculation engine
+(`src/lib/estimating/pricing-engine.ts`) implements
+[DOMAIN_MODEL.md §3.6–§3.8](./DOMAIN_MODEL.md#36-margin-calculations)
+as pure functions and is verified against hand-calculated values from
+real seed data (materials, labor rates, overhead, markup) — see the
+commit message for the check list.
+
 ## Migrations
 
 Migrations are generated from schema changes in
@@ -229,7 +283,7 @@ committed to version control.
 
 ## Row Level Security (RLS)
 
-RLS is **enabled with no policies defined** on all 31 tables so far
+RLS is **enabled with no policies defined** on all 39 tables so far
 (`roles`, `permissions`, `role_permissions`, `users`,
 `organization_settings`, `customers`, `contacts`, `addresses`, `uoms`,
 `cost_categories`, `material_categories`, `product_categories`,
@@ -239,9 +293,11 @@ RLS is **enabled with no policies defined** on all 31 tables so far
 `equipment_template_lines`, `overhead_templates`,
 `overhead_template_lines`, `product_templates`, `products`,
 `markup_rules`, `discount_rules`, `tax_rules`,
-`customer_pricing_agreements`, `approval_thresholds`). The
-application only ever accesses these tables through the Drizzle client
-over a direct Postgres connection
+`customer_pricing_agreements`, `approval_thresholds`,
+`estimate_statuses`, `estimate_number_counters`, `estimates`,
+`estimate_revisions`, `estimate_items`, `approvals`, `attachments`,
+`notes`). The application only ever accesses these tables through the
+Drizzle client over a direct Postgres connection
 (a privileged role that bypasses RLS entirely), so RLS isn't doing
 access control here — it's a deny-by-default safeguard against
 accidental exposure if these tables were ever queried through
