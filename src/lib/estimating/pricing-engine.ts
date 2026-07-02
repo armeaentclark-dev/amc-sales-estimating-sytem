@@ -2,18 +2,13 @@ import { and, eq, gte, isNull, lte, or } from "drizzle-orm";
 
 import { db } from "@/lib/db/client";
 import {
-  costCategories,
   customerPricingAgreements,
   discountRules,
-  equipment,
-  equipmentTemplateLines,
   laborProcesses,
   laborRates,
-  laborTemplateLines,
   markupRules,
   materialCategories,
   materials,
-  overheadTemplateLines,
   productTemplates,
   taxRules,
 } from "@/lib/db/schema";
