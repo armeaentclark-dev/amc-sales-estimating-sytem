@@ -4,6 +4,28 @@ Short ADR-style log of notable decisions. Newest first.
 
 ---
 
+## 2026-07-02 — Vitest, reusing the dev DB for pricing engine tests
+
+Chose **Vitest** for the first real test suite (matches the `rtk`
+tooling already documented in the user's global CLAUDE.md, ESM-native,
+fast). Scoped the first pass to `src/lib/estimating/pricing-engine.ts`
+only — the highest-stakes code (computes real quote numbers) and the
+only code this session had already hand-verified.
+
+The engine queries the DB directly rather than being pure functions,
+so testing it needs real rows. Chose to **reuse the dev Supabase DB**
+rather than provision a separate test database: no new infrastructure
+(a second Supabase project, or local Postgres via Docker, is a real
+setup cost this session didn't take on), at the price of tests
+seeding/cleaning up their own fixtures in the same database developers
+work in day-to-day. Mitigated with a `__vitest__`-prefixed naming
+convention (easy to spot/grep if cleanup ever fails) and `afterAll`
+deletion in FK-safe order, verified to leave zero residue. Revisit if
+a failed test run ever actually leaves orphaned rows in practice, or
+once the project is far enough along to justify a dedicated test DB.
+
+---
+
 ## 2026-07-02 — Two ambiguous domain-model formulas, interpreted and confirmed
 
 Two spots in `DOMAIN_MODEL.md` §3.6 didn't have one unambiguous

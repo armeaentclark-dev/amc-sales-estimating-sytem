@@ -34,5 +34,17 @@
 
 ## Testing
 
-_TBD — testing framework and conventions to be defined before the first
-feature module ships._
+- Framework: **Vitest** (`pnpm test` to run once, `pnpm test:watch`
+  for watch mode). Config in `vitest.config.ts`; `vitest.setup.ts`
+  loads `.env.local` before tests run.
+- Tests that hit the database (e.g. the pricing engine, which queries
+  the DB directly rather than being pure) run against the **dev
+  Supabase DB** — there's no dedicated test database yet. Seed
+  fixtures with a unique, greppable prefix (e.g. `__vitest__`) in
+  `beforeAll` and delete them in `afterAll`, in FK-safe order. See
+  `src/lib/estimating/pricing-engine.test.ts` for the pattern, and
+  [DECISIONS.md](./DECISIONS.md) for why this approach was chosen over
+  provisioning a separate test database.
+- Import `describe`/`it`/`expect`/etc. explicitly from `"vitest"`
+  rather than relying on injected globals — keeps ESLint happy without
+  a test-specific config.

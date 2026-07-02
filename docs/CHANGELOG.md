@@ -7,6 +7,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- Testing: Vitest (`pnpm test`), scoped to
+  `src/lib/estimating/pricing-engine.ts` for now — the first real
+  automated test suite in the project. Integration-style, seeding/
+  cleaning up its own fixtures against the dev DB; see
+  `CODING_STANDARDS.md` and `DECISIONS.md`.
 - Phase 8: Estimate Builder — the last piece of the original scope.
   - `estimate_statuses` (seeded state machine, 10 states per
     `DOMAIN_MODEL.md` §3.1/§3.4), `estimates` (`EST-YYYY-NNNNNN`,
