@@ -45,6 +45,21 @@
   `src/lib/estimating/pricing-engine.test.ts` for the pattern, and
   [DECISIONS.md](./DECISIONS.md) for why this approach was chosen over
   provisioning a separate test database.
+- Server actions (`"use server"` files) call `revalidatePath` and, for
+  Estimate actions, resolve the current user via
+  `createClient().auth.getUser()` (needs `next/headers`' `cookies()`)
+  — both need Next.js's request context and throw when called
+  directly from a test. `vitest.setup.ts` mocks `next/cache` globally;
+  action test files that need an authenticated user mock
+  `@/lib/supabase/server`'s `createClient` to return a real seeded
+  user's id (see `src/lib/actions/estimates.test.ts`) — fabricating a
+  random UUID would violate the FK constraints on
+  `salesperson_id`/`created_by`/`approver_id`.
+- Running these tests advances the `CUS-`/`EST-`-style sequence
+  counters even though the rows get deleted (Postgres sequences don't
+  reclaim numbers on delete) — this is expected, not a bug to fix.
+  `DOMAIN_MODEL.md` §4 already requires sequence-based generation
+  specifically because gaps are an acceptable, normal outcome.
 - Import `describe`/`it`/`expect`/etc. explicitly from `"vitest"`
   rather than relying on injected globals — keeps ESLint happy without
   a test-specific config.
