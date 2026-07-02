@@ -342,13 +342,11 @@ export interface MarkupResolution {
   ruleId: string | null;
 }
 
-// DOMAIN_MODEL.md §1.2/§3.6: "most-specific wins" — Customer is
-// interpreted as most specific (a negotiated deal beats a product
-// default), then Product Template, then Product Category as the
-// coarsest fallback. This ordering isn't spelled out verbatim in the
-// domain model; it's the most natural reading of "most-specific
-// wins" and is documented in DECISIONS.md for the user to correct if
-// wrong.
+// DOMAIN_MODEL.md §1.2/§3.6: "most-specific wins" — Customer is most
+// specific (a negotiated deal beats a product default), then Product
+// Template, then Product Category as the coarsest fallback. This
+// ordering isn't spelled out verbatim in the domain model; confirmed
+// correct by the user — see DECISIONS.md.
 export async function resolveMarkup(params: {
   customerId: string | null;
   productTemplateId: string | null;

@@ -4,20 +4,19 @@ Short ADR-style log of notable decisions. Newest first.
 
 ---
 
-## 2026-07-02 — ⚠️ Two ambiguous domain-model formulas, interpreted and flagged for review
+## 2026-07-02 — Two ambiguous domain-model formulas, interpreted and confirmed
 
-Two spots in `DOMAIN_MODEL.md` §3.6 don't have one unambiguous
-reading. Both were resolved in favor of internal consistency and
-verified against hand-calculated test data (all pass), but since this
-computes real quote numbers, both are called out explicitly here for
-the domain model's author to confirm or correct:
+Two spots in `DOMAIN_MODEL.md` §3.6 didn't have one unambiguous
+reading. Both were resolved in favor of internal consistency, verified
+against hand-calculated test data, and **confirmed correct by the
+user on 2026-07-02** — no code changes needed:
 
 1. **`flat_per_unit` overhead**: the formula literally reads
    `rate × quantity`, but `Extended Price = Net Price × Quantity`
    means quantity must only be applied _once_, and every other cost
    component (Material/Labor/Equipment Cost) is computed **per unit**
    with no quantity multiplication. Applying `rate × quantity` again
-   inside Overhead Cost would double-count. Interpreted `flat_per_unit`
+   inside Overhead Cost would double-count. Implemented `flat_per_unit`
    as "the rate already **is** the per-unit overhead cost" — i.e.
    Overhead Cost contribution = `rate`, not `rate × quantity`. Verified:
    `computeEstimateItemPricing` at quantity=1 and quantity=3 returns
@@ -26,12 +25,11 @@ the domain model's author to confirm or correct:
 2. **Markup Rule "most-specific wins" ordering**: §1.2 says Markup
    Rule is "attachable at Product Category, Product Template, or
    Customer level (most-specific wins)" but doesn't rank those three
-   against each other. Interpreted Customer as most specific (a
+   against each other. Implemented Customer as most specific (a
    negotiated deal beats a product default), then Product Template,
-   then Product Category as the coarsest fallback — the most natural
-   reading, and symmetric with how §3.7/§3.8's material/labor
-   hierarchies already put "customer-specific negotiated price" above
-   catalog-level pricing.
+   then Product Category as the coarsest fallback — symmetric with how
+   §3.7/§3.8's material/labor hierarchies already put "customer-specific
+   negotiated price" above catalog-level pricing.
 
 Both live in `src/lib/estimating/pricing-engine.ts`
 (`computeProductTemplateCost`'s overhead loop, `resolveMarkup`'s scope
